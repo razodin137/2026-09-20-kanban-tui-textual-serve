@@ -1,0 +1,1 @@
+"""kanban-tui — kanban board TUI (terminal for agents, web for people)."""
