@@ -1,7 +1,133 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>Coming soon</title></head>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>
+2026-09-20-kanban-tui-textual-serve</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    max-width: 46rem;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    line-height: 1.65;
+  }
+  a { color: #0969da; }
+  @media (prefers-color-scheme: dark) { a { color: #4493f8; } }
+  pre {
+    background: #f6f8fa; border-radius: 6px; padding: 1rem;
+    overflow-x: auto; font-size: 0.875rem;
+  }
+  @media (prefers-color-scheme: dark) { pre { background: #151b23; } }
+  code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #d0d7de; padding: 0.375rem 0.75rem; }
+  th { background: #f6f8fa; }
+  @media (prefers-color-scheme: dark) { th, td { border-color: #3d444d; } th { background: #151b23; } }
+  h1, h2 { border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+  @media (prefers-color-scheme: dark) { h1, h2 { border-color: #3d444d; } }
+</style>
+</head>
 <body>
-<h1>This page does not have an index.html set up yet!</h1>
+<h1>kanban-tui — the terminal is for agents, the web is for people</h1>
+<p>A kanban board built with <a href="https://textual.textualize.io/">Textual</a> — the terminal is for agents, the web is for people.</p>
+<p><strong>Repository:</strong> <a href="https://github.com/razodin137/2026-09-20-kanban-tui-textual-serve">razodin137/2026-09-20-kanban-tui-textual-serve</a></p>
+<ul>
+<li><strong>Terminal</strong>: keyboard-driven TUI with fuzzy search everywhere (command palette <code>ctrl+p</code>, quick-jump <code>ctrl+k</code>), plus a companion CLI for agents to call from bash.</li>
+<li><strong>Web</strong>: the same app served to browsers via <a href="https://github.com/Textualize/textual-serve">textual-serve</a> — full keybindings and palette work over the websocket.</li>
+<li><strong>One data file</strong>: everything reads and writes a single human-editable <code>board.md</code>.</li>
+</ul>
+<h2>Quick start</h2>
+<pre><code class="language-sh">uv sync
+
+# terminal (for agents)
+uv run kanban init          # create ./board.md
+uv run kanban-tui           # run the TUI
+
+# web (for people)
+uv run kanban-serve --port 8000   # open http://localhost:8000
+</code></pre>
+<p>Use <code>--board path/to/board.md</code> (or the <code>KANBAN_BOARD</code> env var) to point every command at the same file. External edits — including from the CLI or your editor — are picked up by the TUI within ~1 second.</p>
+<h2>The board file</h2>
+<pre><code class="language-markdown"># My Board
+
+## Backlog
+
+- write parser
+- fix favicon #bug #web
+
+## Doing
+
+- kanban board
+</code></pre>
+<ul>
+<li>Columns are <code>## Name</code> sections, in file order. Any section name works.</li>
+<li>Cards are <code>- title</code> lines. Every <code>#token</code> is a tag; the rest is the title.</li>
+<li>A card&#39;s identity is <code>(column, 1-based index)</code> — not stored in the file.</li>
+</ul>
+<h2>TUI keys</h2>
+<table>
+<thead>
+<tr>
+<th>key</th>
+<th>action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ctrl+p</code></td>
+<td>command palette — every board action, fuzzy-matched</td>
+</tr>
+<tr>
+<td><code>ctrl+k</code></td>
+<td>fuzzy jump to card</td>
+</tr>
+<tr>
+<td><code>a</code></td>
+<td>add card in focused column</td>
+</tr>
+<tr>
+<td><code>h</code> / <code>l</code> (or arrows)</td>
+<td>move card to previous / next column</td>
+</tr>
+<tr>
+<td><code>shift+↑</code> / <code>shift+↓</code></td>
+<td>reorder card within column</td>
+</tr>
+<tr>
+<td><code>enter</code></td>
+<td>edit card title</td>
+</tr>
+<tr>
+<td><code>d</code></td>
+<td>delete card (confirm)</td>
+</tr>
+<tr>
+<td><code>e</code></td>
+<td>plain-text export view</td>
+</tr>
+<tr>
+<td><code>r</code></td>
+<td>reload board.md from disk</td>
+</tr>
+<tr>
+<td><code>q</code></td>
+<td>quit</td>
+</tr>
+</tbody></table>
+<h2>CLI (for agents)</h2>
+<pre><code class="language-sh">kanban init [--columns Backlog,Doing,Done]
+kanban add &lt;column&gt; &quot;title #tag&quot; [--tags a,b]
+kanban move &lt;column&gt; &lt;index&gt; &lt;dest-column&gt; [--index N | --top]
+kanban delete &lt;column&gt; &lt;index&gt; [--yes]
+kanban list [--json]      # --json: machine-readable board dump
+kanban columns
+</code></pre>
+<h2>Development</h2>
+<pre><code class="language-sh">uv run pytest        # board round-trips, CLI, headless TUI
+</code></pre>
+<p>Layout: <code>src/kanban_tui/board.py</code> (pure-stdlib model + markdown, shared by TUI and CLI), <code>cli.py</code> (argparse, no textual), <code>tui/</code> (app, widgets, palette provider, dialogs), <code>serve.py</code> (textual-serve entrypoint).</p>
+
 </body>
 </html>
